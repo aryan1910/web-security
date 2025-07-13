@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSRF Protected Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .info { background: #f0f8ff; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .button { display: inline-block; padding: 10px 15px; margin: 10px 5px; background: #007cba; color: white; text-decoration: none; border-radius: 3px; }
+        form { margin: 20px 0; }
+        input[type="text"] { padding: 8px; margin: 5px; }
+        button { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>CSRF-Protected Form</h1>
+    
+    <div class="info">
+        <h3>Session Info:</h3>
+        <p>Visit Count: {{ .visitCount }}</p>
+        <p>CSRF Token: {{ .csrfToken }}</p>
+    </div>
+    
+    <a href="/cookies" class="button">View All Cookies</a>
+    
+    <form method="POST" action="/submit">
+        <input type="hidden" name="_csrf" value="{{ .csrfToken }}">
+        <input type="text" name="name" placeholder="Enter your name" required>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <div class="info">
+        <h3>How to View Cookies:</h3>
+        <ul>
+            <li>Click "View All Cookies" button above</li>
+            <li>Check browser developer tools (F12) → Application/Storage → Cookies</li>
+            <li>Check server console output for cookie logs</li>
+        </ul>
+    </div>
+</body>
+</html>
