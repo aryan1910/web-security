@@ -44,7 +44,6 @@ Attackers may attempt to run various harmful commands, such as:
 #### Mitigation Strategies
 
 - **Never** pass user input directly to system commands.
-- Use safe APIs or parameterized functions.
 - Validate and sanitize all user inputs.
 - Apply the principle of least privilege to the application process.
 
