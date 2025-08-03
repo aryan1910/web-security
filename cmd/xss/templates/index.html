@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Post</title>
+</head>
+<body>
+    <h1>Interesting Post</h1>
+    <form method="POST" action="/">
+        <textarea name="comment" rows="4" cols="50"></textarea><br>
+        <input type="submit" value="Submit Comment">
+    </form>
+
+    <h3>Comments:</h3>
+    {{range .Comments}}
+        <p>{{.}}</p> <!-- Deliberately NOT escaped -->
+    {{end}}
+</body>
+</html>
