@@ -4,28 +4,40 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 	"sync"
 )
 
 type Server struct {
-	comments []template.HTML // Unsafe on purpose!
 	mu       sync.Mutex
+	comments []template.HTML
+	tmpl     *template.Template
 }
 
 func main() {
+
+	tmplPath := filepath.Join("cmd", "xss", "templates", "index.html")
+	tmpl := template.Must(template.ParseFiles(tmplPath))
+
 	server := &Server{
+		tmpl:     tmpl,
 		comments: []template.HTML{},
 	}
 
-	http.HandleFunc("/", server.handle)
+	http.HandleFunc("/", server.handleComments)
 
-	log.Println("Server running at http://localhost:8080")
+	log.Println("⚠️  XSS demo server running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		r.ParseForm()
+func (s *Server) handleComments(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "Invalid form submission", http.StatusBadRequest)
+			return
+		}
+
 		comment := r.FormValue("comment")
 
 		s.mu.Lock()
@@ -33,31 +45,21 @@ func (s *Server) handle(w http.ResponseWriter, r *http.Request) {
 		s.mu.Unlock()
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
+
+	case http.MethodGet:
+		s.mu.Lock()
+		data := struct {
+			Comments []template.HTML
+		}{
+			Comments: s.comments,
+		}
+		s.mu.Unlock()
+
+		if err := s.tmpl.Execute(w, data); err != nil {
+			http.Error(w, "Template rendering error", http.StatusInternalServerError)
+		}
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-
-	tmpl := `
-		<!DOCTYPE html>
-		<html>
-		<head><title>XSS Demo</title></head>
-		<body>
-			<h1>XSS Demo Page</h1>
-			<form method="POST" action="/">
-				<textarea name="comment" rows="4" cols="50"></textarea><br>
-				<input type="submit" value="Post Comment">
-			</form>
-
-			<h3>Comments:</h3>
-			{{range .}}
-				<p>{{.}}</p>
-			{{end}}
-		</body>
-		</html>
-	`
-
-	t := template.Must(template.New("page").Parse(tmpl))
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	t.Execute(w, s.comments)
 }
