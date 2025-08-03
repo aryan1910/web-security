@@ -20,7 +20,7 @@ func main() {
 	store := cookie.NewStore([]byte("super-secret-key"))
 	r.Use(sessions.Sessions("mysession", store))
 
-	// Setup CSRF middleware
+	// CSRF middleware allows the GET method and validates the csrf token for post request 
 	r.Use(csrf.Middleware(csrf.Options{
 		Secret: "a-32-byte-secret-key-for-production!",
 		ErrorFunc: func(c *gin.Context) {
