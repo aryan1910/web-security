@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XSS Demo</title>
+</head>
+<body>
+    <h1>XSS Vulnerable Comment Box</h1>
+
+    <form method="POST" action="/">
+        <textarea name="comment" rows="4" cols="50" placeholder="Write a comment..."></textarea><br>
+        <input type="submit" value="Post Comment">
+    </form>
+
+    <h3>Comments:</h3>
+    {{range .Comments}}<p>{{.}}</p>{{end}}
+</body>
+</html>
